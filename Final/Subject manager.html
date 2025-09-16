@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subject Manager</title>
+    <style>
+        /* --- General Styling --- */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .dashboard-module {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 25px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        h2 {
+            margin: 0 0 20px 0;
+            color: #1c1e21;
+            border-bottom: 2px solid #e4e6eb;
+            padding-bottom: 10px;
+        }
+
+        /* --- Controls & Inputs --- */
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        select, input[type="text"], button {
+            padding: 10px 14px;
+            border: 1px solid #dddfe2;
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s ease-in-out;
+        }
+
+        select:focus, input[type="text"]:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+        }
+
+        button {
+            cursor: pointer;
+            color: #fff;
+            background-color: #007bff;
+            border-color: #007bff;
+            font-weight: 600;
+        }
+        
+        button:hover {
+            background-color: #0069d9;
+            border-color: #0062cc;
+        }
+
+        button.secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+
+        button.secondary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+
+        button.danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+        
+        button.danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+        
+        /* --- Student Search --- */
+        #student-search-results {
+            margin-top: -15px;
+            margin-bottom: 25px;
+        }
+
+        .student-result-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .student-result-card .info {
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .student-result-card .info span {
+            display: block;
+            font-size: 0.9rem;
+            color: #6c757d;
+            font-weight: 400;
+        }
+
+        /* --- AI Suggestions --- */
+        .ai-suggestions {
+            background-color: #e7f3ff;
+            border: 1px solid #b3d7ff;
+            padding: 15px;
+            margin-bottom: 25px;
+            border-radius: 8px;
+        }
+        
+        .ai-suggestions h4 {
+            margin: 0 0 10px 0;
+            color: #004085;
+        }
+
+        .ai-suggestions .badge {
+            display: inline-block;
+            background-color: #fff;
+            color: #007bff;
+            border: 1px solid #007bff;
+            padding: 5px 10px;
+            margin: 5px 5px 5px 0;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .ai-suggestions .badge:hover {
+            background-color: #007bff;
+            color: #fff;
+        }
+        
+        /* --- Subject List --- */
+        .subject-card {
+            background: #fafafa;
+            border: 1px solid #e4e6eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .subject-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .subject-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: #4b4f56;
+        }
+
+        .subject-actions button, .chapter-actions button {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            margin-left: 5px;
+        }
+
+        .chapter-list ul {
+            list-style: none;
+            padding-left: 5px;
+            margin: 0;
+        }
+        
+        .chapter-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .chapter-list li:last-child {
+            border-bottom: none;
+        }
+        
+        #loading, #no-data {
+            text-align: center;
+            color: #6c757d;
+            padding: 20px;
+        }
+
+    </style>
+</script>
+</head>
+<body>
+
+
+    <div class="dashboard-module">
+
+    <nav style="background:#0d6efd; padding:12px; border-radius:8px; margin-bottom:20px; display:flex; gap:15px; flex-wrap:wrap;">
+    <a href="Student Directory.html" style="color:white; text-decoration:none; ">🏫 Student Directory</a> 
+    <a href="Subject manager.html" style="color:white; text-decoration:none; font-weight:bold;">📚 Subject Manager</a>
+    <a href="Syllabus_progress.html" style="color:white; text-decoration:none;">📊 Syllabus Progress</a>
+    <a href="workpool.html" style="color:white; text-decoration:none;">📝 Work Pool</a>
+    <a href="Dought Task.html" style="color:white; text-decoration:none;">❓ Doubt Box</a>
+    <a href="Test Treacker.html" style="color:white; text-decoration:none;">📘 Test Tracker</a>
+    <a href="Attendence.html" style="color:white; text-decoration:none;">📅 Attendance</a>
+</nav>
+
+        <h2>📚 Subject Manager</h2>
+
+        <div class="controls">
+            <input type="text" id="student-name-search" placeholder="Search by Student Name..." style="flex-grow: 2;">
+            <input type="text" id="student-id-search" placeholder="Search by Student ID..." style="flex-grow: 1;">
+            <button id="search-student-btn">Search</button>
+        </div>
+        <div id="student-search-results"></div>
+
+        <div class="ai-suggestions" id="ai-suggestions-container" style="display: none;">
+            <h4>🤖 AI-Suggested Subjects</h4>
+            <div id="ai-suggestions-list"></div>
+        </div>
+
+        <div id="subject-management-area" style="display: none;">
+            <h3 id="selected-student-header">Subjects for <span id="selected-student-name"></span></h3>
+            <div class="controls">
+                <input type="text" id="new-subject-name" placeholder="Enter New Subject Name">
+                <button id="add-subject-btn">Add Subject</button>
+            </div>
+            <hr style="border: 0; border-top: 1px solid #e4e6eb; margin: 20px 0;">
+            <div id="subject-list-container"></div>
+            <div id="loading" style="display: none;">Loading subjects...</div>
+            <div id="no-data" style="display: none;">No subjects assigned yet. Add one to get started!</div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+    <script>
+        // --- FIREBASE CONFIGURATION ---
+        // Replace with your actual Firebase project configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBOhbm4Hgg0fhcomZfp-BpC6jfeAsshuF8",
+            authDomain: "edudashboard-65a9f.firebaseapp.com",
+            projectId: "edudashboard-65a9f",
+            storageBucket: "edudashboard-65a9f.firebasestorage.app",
+            messagingSenderId: "1007330679468",
+            appId: "1:1007330679468:web:97cff4a762e9fd9df51d09"
+    };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // --- DOM ELEMENTS ---
+        const studentNameSearchInput = document.getElementById('student-name-search');
+        const studentIdSearchInput = document.getElementById('student-id-search');
+        const searchStudentBtn = document.getElementById('search-student-btn');
+        const studentSearchResultsContainer = document.getElementById('student-search-results');
+        const selectedStudentHeader = document.getElementById('selected-student-header');
+        const selectedStudentNameSpan = document.getElementById('selected-student-name');
+        
+        const subjectMgmtArea = document.getElementById('subject-management-area');
+        const subjectListContainer = document.getElementById('subject-list-container');
+        const newSubjectNameInput = document.getElementById('new-subject-name');
+        const addSubjectBtn = document.getElementById('add-subject-btn');
+        const loadingDiv = document.getElementById('loading');
+        const noDataDiv = document.getElementById('no-data');
+        const aiSuggestionsContainer = document.getElementById('ai-suggestions-container');
+        const aiSuggestionsList = document.getElementById('ai-suggestions-list');
+
+        let studentsData = []; // To store all student data for searching
+        let selectedStudent = null; // To store the currently selected student object
+
+        // --- CORE FUNCTIONS ---
+
+        /**
+         * Loads all students from the 'students' collection into memory for searching.
+         */
+        async function loadStudents() {
+            try {
+                const snapshot = await db.collection('students').get();
+                studentsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                
+                if (studentsData.length === 0) {
+                    alert("No students found in the database.");
+                }
+            } catch (error) {
+                console.error("Error loading students: ", error);
+                alert("Could not load students from Firebase.");
+            }
+        }
+
+        /**
+         * Fetches and displays subjects and chapters for the selected student.
+         * @param {string} studentId - The ID of the student.
+         */
+        function loadSubjects(studentId) {
+            if (!studentId) return;
+
+            loadingDiv.style.display = 'block';
+            noDataDiv.style.display = 'none';
+            subjectListContainer.innerHTML = '';
+
+            const docRef = db.collection('subjectAssignments').doc(studentId);
+
+            // Real-time listener for updates
+            docRef.onSnapshot(doc => {
+                loadingDiv.style.display = 'none';
+                subjectListContainer.innerHTML = ''; // Clear before re-rendering
+
+                if (doc.exists && doc.data().subjects && doc.data().subjects.length > 0) {
+                    noDataDiv.style.display = 'none';
+                    const { subjects } = doc.data();
+                    renderSubjects(studentId, subjects);
+                } else {
+                    noDataDiv.style.display = 'block';
+                }
+            }, error => {
+                console.error("Error fetching subjects: ", error);
+                alert("An error occurred while fetching subjects.");
+                loadingDiv.style.display = 'none';
+            });
+        }
+
+        /**
+         * Renders the subject cards and chapter lists on the UI.
+         * @param {string} studentId - The ID of the student.
+         * @param {Array} subjects - The array of subject objects.
+         */
+        function renderSubjects(studentId, subjects) {
+            subjects.forEach((subject, subjectIndex) => {
+                const subjectCard = document.createElement('div');
+                subjectCard.className = 'subject-card';
+
+                subjectCard.innerHTML = `
+                    <div class="subject-header">
+                        <h3>${subject.name}</h3>
+                        <div class="subject-actions">
+                            <button class="secondary edit-subject-btn">Edit</button>
+                            <button class="danger delete-subject-btn">Delete</button>
+                        </div>
+                    </div>
+                    <div class="chapter-list">
+                        <ul></ul>
+                        <div class="controls" style="margin-top: 10px;">
+                            <input type="text" class="new-chapter-name" placeholder="Add new chapter...">
+                            <button class="add-chapter-btn">Add Chapter</button>
+                        </div>
+                    </div>
+                `;
+
+                // Render chapters
+                const chapterListUl = subjectCard.querySelector('ul');
+                if (subject.chapters && subject.chapters.length > 0) {
+                    subject.chapters.forEach((chapter, chapterIndex) => {
+                        const li = document.createElement('li');
+                        li.innerHTML = `
+                            <span>${chapter}</span>
+                            <div class="chapter-actions">
+                                <button class="secondary edit-chapter-btn">Edit</button>
+                                <button class="danger delete-chapter-btn">Delete</button>
+                            </div>
+                        `;
+                        // Attach event listeners for chapter actions
+                        li.querySelector('.edit-chapter-btn').addEventListener('click', () => editChapter(studentId, subjectIndex, chapterIndex));
+                        li.querySelector('.delete-chapter-btn').addEventListener('click', () => deleteChapter(studentId, subjectIndex, chapterIndex));
+                        chapterListUl.appendChild(li);
+                    });
+                }
+
+                // Attach event listeners for subject actions
+                subjectCard.querySelector('.edit-subject-btn').addEventListener('click', () => editSubject(studentId, subjectIndex));
+                subjectCard.querySelector('.delete-subject-btn').addEventListener('click', () => deleteSubject(studentId, subjectIndex));
+                subjectCard.querySelector('.add-chapter-btn').addEventListener('click', (e) => {
+                    const chapterName = e.target.previousElementSibling.value.trim();
+                    if (chapterName) {
+                        addChapter(studentId, subjectIndex, chapterName);
+                        e.target.previousElementSibling.value = '';
+                    }
+                });
+
+                subjectListContainer.appendChild(subjectCard);
+            });
+        }
+
+        /**
+         * Generates and displays AI-suggested subjects based on student's grade/board.
+         * @param {string} studentId - The ID of the student.
+         */
+        function showAiSuggestions(studentId) {
+            const student = studentsData.find(s => s.id === studentId);
+            if (!student) {
+                aiSuggestionsContainer.style.display = 'none';
+                return;
+            }
+
+            let suggestions = [];
+            // Simple suggestion logic
+            if (student.grade === '10' && student.board === 'CBSE') {
+                suggestions = ['Science', 'Mathematics', 'Social Science', 'English', 'Hindi'];
+            } else if (student.grade === '12' && student.board === 'CBSE') {
+                 suggestions = ['Physics', 'Chemistry', 'Mathematics', 'Computer Science', 'English'];
+            } else {
+                suggestions = ['General Science', 'Mathematics', 'History'];
+            }
+            
+            aiSuggestionsList.innerHTML = '';
+            suggestions.forEach(sub => {
+                const badge = document.createElement('span');
+                badge.className = 'badge';
+                badge.textContent = `+ ${sub}`;
+                badge.onclick = () => addSubject(studentId, sub, true); // Pass a flag to handle existing subjects
+                aiSuggestionsList.appendChild(badge);
+            });
+            
+            aiSuggestionsContainer.style.display = 'block';
+        }
+
+
+        // --- CRUD OPERATIONS ---
+
+        /**
+         * Adds a new subject for a student.
+         * @param {string} studentId - The ID of the student.
+         * @param {string} subjectName - The name of the new subject.
+         * @param {boolean} fromSuggestion - Flag to check if added from AI suggestions.
+         */
+        async function addSubject(studentId, subjectName, fromSuggestion = false) {
+            if (!subjectName) return;
+            const docRef = db.collection('subjectAssignments').doc(studentId);
+            
+            try {
+                const doc = await docRef.get();
+                if (doc.exists && doc.data().subjects && doc.data().subjects.some(s => s.name.toLowerCase() === subjectName.toLowerCase())) {
+                    if (fromSuggestion) return; // Don't alert for suggestions
+                    alert(`Subject "${subjectName}" already exists for this student.`);
+                    return;
+                }
+
+                const newSubject = { name: subjectName, chapters: [] };
+                await docRef.set({
+                    subjects: firebase.firestore.FieldValue.arrayUnion(newSubject)
+                }, { merge: true });
+
+                if (!fromSuggestion) newSubjectNameInput.value = '';
+
+            } catch (error) {
+                console.error("Error adding subject: ", error);
+                alert("Failed to add subject.");
+            }
+        }
+
+        /**
+         * Deletes a subject by its index.
+         * @param {string} studentId
+         * @param {number} subjectIndex
+         */
+        async function deleteSubject(studentId, subjectIndex) {
+            if (!confirm("Are you sure you want to delete this subject and all its chapters?")) return;
+            const docRef = db.collection('subjectAssignments').doc(studentId);
+            const doc = await docRef.get();
+            if (doc.exists) {
+                const subjects = doc.data().subjects;
+                subjects.splice(subjectIndex, 1);
+                await docRef.update({ subjects });
+            }
+        }
+        
+        /**
+         * Edits a subject's name by its index.
+         * @param {string} studentId
+         * @param {number} subjectIndex
+         */
+        async function editSubject(studentId, subjectIndex) {
+            const docRef = db.collection('subjectAssignments').doc(studentId);
+            const doc = await docRef.get();
+            if (doc.exists) {
+                const subjects = doc.data().subjects;
+                const oldName = subjects[subjectIndex].name;
+                const newName = prompt("Enter new name for the subject:", oldName);
+                if (newName && newName.trim() !== oldName) {
+                    subjects[subjectIndex].name = newName.trim();
+                    await docRef.update({ subjects });
+                }
+            }
+        }
+        
+        /**
+         * Adds a new chapter to a subject.
+         * @param {string} studentId
+         * @param {number} subjectIndex
+         * @param {string} chapterName
+         */
+        async function addChapter(studentId, subjectIndex, chapterName) {
+            const docRef = db.collection('subjectAssignments').doc(studentId);
+            const doc = await docRef.get();
+            if (doc.exists) {
+                const subjects = doc.data().subjects;
+                if (subjects[subjectIndex].chapters.includes(chapterName)) {
+                    alert(`Chapter "${chapterName}" already exists.`);
+                    return;
+                }
+                subjects[subjectIndex].chapters.push(chapterName);
+                await docRef.update({ subjects });
+            }
+        }
+
+        /**
+         * Deletes a chapter by its index.
+         * @param {string} studentId
+         * @param {number} subjectIndex
+         * @param {number} chapterIndex
+         */
+        async function deleteChapter(studentId, subjectIndex, chapterIndex) {
+            if (!confirm("Are you sure you want to delete this chapter?")) return;
+            const docRef = db.collection('subjectAssignments').doc(studentId);
+            const doc = await docRef.get();
+            if (doc.exists) {
+                const subjects = doc.data().subjects;
+                subjects[subjectIndex].chapters.splice(chapterIndex, 1);
+                await docRef.update({ subjects });
+            }
+        }
+
+        /**
+         * Edits a chapter's name by its index.
+         * @param {string} studentId
+         * @param {number} subjectIndex
+         * @param {number} chapterIndex
+         */
+        async function editChapter(studentId, subjectIndex, chapterIndex) {
+            const docRef = db.collection('subjectAssignments').doc(studentId);
+            const doc = await docRef.get();
+            if (doc.exists) {
+                const subjects = doc.data().subjects;
+                const oldName = subjects[subjectIndex].chapters[chapterIndex];
+                const newName = prompt("Enter new name for the chapter:", oldName);
+                if (newName && newName.trim() !== oldName) {
+                    subjects[subjectIndex].chapters[chapterIndex] = newName.trim();
+                    await docRef.update({ subjects });
+                }
+            }
+        }
+        
+        // --- STUDENT SEARCH & SELECTION ---
+
+        /**
+         * Handles the student search logic.
+         */
+        function handleStudentSearch() {
+            const nameQuery = studentNameSearchInput.value.toLowerCase().trim();
+            const idQuery = studentIdSearchInput.value.toLowerCase().trim();
+
+            const filteredStudents = studentsData.filter(student => {
+                const nameMatch = student.name.toLowerCase().includes(nameQuery);
+                const idMatch = student.id.toLowerCase().includes(idQuery);
+                return nameMatch && idMatch;
+            });
+            
+            renderSearchResults(filteredStudents);
+
+            // Hide subject area until a new student is selected
+            subjectMgmtArea.style.display = 'none';
+            aiSuggestionsContainer.style.display = 'none';
+            selectedStudent = null;
+        }
+
+        /**
+         * Renders the list of students found in the search.
+         * @param {Array} results - Array of student objects.
+         */
+        function renderSearchResults(results) {
+            studentSearchResultsContainer.innerHTML = '';
+            if (results.length === 0) {
+                studentSearchResultsContainer.innerHTML = '<p style="text-align: center; color: #6c757d;">No students found.</p>';
+                return;
+            }
+
+            results.forEach(student => {
+                const card = document.createElement('div');
+                card.className = 'student-result-card';
+                card.innerHTML = `
+                    <div class="info">
+                        ${student.name}
+                        <span>Grade ${student.grade}, ${student.board}</span>
+                    </div>
+                    <button class="select-student-btn" data-student-id="${student.id}">Select</button>
+                `;
+                studentSearchResultsContainer.appendChild(card);
+            });
+        }
+
+        /**
+         * Handles selecting a student from the search results.
+         * @param {Event} event - The click event.
+         */
+        function handleStudentSelect(event) {
+            if (!event.target.matches('.select-student-btn')) return;
+
+            const studentId = event.target.dataset.studentId;
+            selectedStudent = studentsData.find(s => s.id === studentId);
+            
+            if (selectedStudent) {
+                studentSearchResultsContainer.innerHTML = ''; // Clear search results
+                studentNameSearchInput.value = '';
+                studentIdSearchInput.value = '';
+
+                selectedStudentNameSpan.textContent = selectedStudent.name;
+
+                subjectMgmtArea.style.display = 'block';
+                loadSubjects(selectedStudent.id);
+                showAiSuggestions(selectedStudent.id);
+            }
+        }
+
+        // --- EVENT LISTENERS ---
+
+        // Load students when the page loads
+        document.addEventListener('DOMContentLoaded', loadStudents);
+
+        // Handle student search
+        searchStudentBtn.addEventListener('click', handleStudentSearch);
+        studentSearchResultsContainer.addEventListener('click', handleStudentSelect);
+
+        // Handle add subject button click
+        addSubjectBtn.addEventListener('click', () => {
+            const studentId = selectedStudent ? selectedStudent.id : null;
+            const subjectName = newSubjectNameInput.value.trim();
+            if (studentId && subjectName) {
+                addSubject(studentId, subjectName);
+            } else {
+                alert("Please select a student and enter a subject name.");
+            }
+        });
+
+    </script>
+</body>
+</html>
