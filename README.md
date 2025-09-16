@@ -3,6 +3,10 @@
 EduDashboard is a modular web-based student management system built with HTML, CSS, JavaScript, and Firebase Firestore.
 It helps teachers, institutes, and students manage academic activities such as attendance, subjects, syllabus progress, tests, and doubt resolution.
 
+**Important Notes**
+Go to Images folder to check screenshot of Work.
+
+
 **🚀 Features
 🏫 Student Directory**
 
